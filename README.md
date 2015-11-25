@@ -4,4 +4,5 @@
 
 # stl
 
-STL Parser for Go. Understands both
+STL Parser for Go. Understands both binary and ascii STL, and is pretty well
+covered by tests. This library is considered feature complete.
