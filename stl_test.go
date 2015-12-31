@@ -4,7 +4,10 @@
 
 package stl
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestEmptyParse(t *testing.T) {
 	const input = ""
@@ -18,6 +21,28 @@ func TestEmptyParse(t *testing.T) {
 }
 
 func TestASCIIParse(t *testing.T) {
+	facets, err := ParseSTL("testdata/cube.ascii.stl")
+	if err != nil {
+		t.Fatalf("Unable to parse test file \"cube.ascii.stl\": %v", err)
+	}
+
+	if len(facets) != 12 {
+		t.Error(fmt.Sprintf("Expected %v facets, got %v", 12, len(facets)))
+	}
+}
+
+func TestBinaryParse(t *testing.T) {
+	facets, err := ParseSTL("testdata/cube.binary.stl")
+	if err != nil {
+		t.Fatalf("Unable to parse test file \"cube.ascii.stl\": %v", err)
+	}
+
+	if len(facets) != 12 {
+		t.Error(fmt.Sprintf("Expected %v facets, got %v", 12, len(facets)))
+	}
+}
+
+func TestSimpleASCIIParse(t *testing.T) {
 	const input = `solid OpenSCAD_Model
   facet normal 1 0 0
     outer loop
@@ -45,9 +70,21 @@ endsolid OpenSCAD_Model`
 	if facets[0].Vertices[0] != tv {
 		t.Fatalf("Incorrect parse. Got: %+v, expected %+v", facets[0].Vertices[0], tv)
 	}
+	tv = Vertex{1, 0, 0}
+	if facets[0].Normal != tv {
+		t.Fatalf("Incorrect parse. Got %+v, expected %+v", facets[0].Normal, tv)
+	}
+	tv = Vertex{1, 0, -0}
+	if facets[1].Normal != tv {
+		t.Fatalf("Incorrect parse. Got %+v, expected %+v", facets[1].Normal, tv)
+	}
+	tv = Vertex{-2, 0.5, 0.5}
+	if facets[1].Vertices[0] != tv {
+		t.Fatalf("Incorrect parse. Got %+v, expected %+v", facets[1].Vertices[0], tv)
+	}
 }
 
-func TestBinaryParse(t *testing.T) {
+func TestSimpleBinaryParse(t *testing.T) {
 	const input = "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x80?\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xc0\x00\x00\x00?\x00\x00\x00\xbf\x00\x00\x00\xc0\x00\x00\xc0?\x00\x00\x00\xbf\x00\x00\x00\xc0\x00\x00\xc0?\x00\x00\x00?\x00\x00\x00\x00\x80?\x00\x00\x00\x00\x00\x00\x00\x80\x00\x00\x00\xc0\x00\x00\x00?\x00\x00\x00?\x00\x00\x00\xc0\x00\x00\x00?\x00\x00\x00\xbf\x00\x00\x00\xc0\x00\x00\xc0?\x00\x00\x00?\x00\x00"
 	facets, err := ParseSTLBytes([]byte(input))
 	if err != nil {
